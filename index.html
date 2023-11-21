@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fish Feeder</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,600,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type='module' src='https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.esm.js'></script>
+    <script nomodule='' src='https://unpkg.com/ionicons@5.0.0/dist/ionicons/ionicons.js'></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/mdtimepicker.css">
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
+    <script src="assets/js/mdtimepicker.js"></script>
+
+    
+</head>
+
+<body translate="no">
+    <div class="container">
+        <div class="components" id="1">
+            <div class="clock">
+                <div class="hand hours"></div>
+                <div class="hand minutes"></div>
+                <div class="hand seconds"></div>
+                <div class="point"></div>
+                <div class="marker">
+                    <span class="marker__1"></span>
+                    <span class="marker__2"></span>
+                    <span class="marker__3"></span>
+                    <span class="marker__4"></span>
+                </div>
+            </div>
+            <div class="btn btn__primary" onclick="feednow()">
+                <p>Feed Now</p>
+            </div>
+            <div class="btn btn__secondary" onclick="toggleDiv()">
+                <p>Schedule</p>
+            </div>
+        </div>
+        <div class="components2" id="2">
+            <div id="wrapper" class="wrapper">
+            </div>
+            <div class="icon" onclick="addStore()" id="timepicker">
+                <div class="icon__add">
+                    <ion-icon name="add"></ion-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        :root {
+    --primary-light: #8abdff;
+    --primary: #6d5dfc;
+    --primary-dark: #5b0eeb;
+    --white: #FFFFFF;
+    --greyLight-1: #E4EBF5;
+    --greyLight-2: #c8d0e7;
+    --greyLight-3: #bec8e4;
+    --greyDark: #9baacf;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+html {
+    box-sizing: border-box;
+    font-size: 62.5%;
+    overflow-y: scroll;
+    background: var(--greyLight-1);
+}
+
+@media screen and (min-width: 900px) {
+    html {
+        font-size: 75%;
+    }
+    .container {
+        max-height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Poppins", sans-serif;
+        background: var(--greyLight-1);
+        padding-top: 10%;
+    }
+    .components {
+        width: 60%;
+        height: 60%;
+        border-radius: 3rem;
+        box-shadow: 0.8rem 0.8rem 1.4rem var(--greyLight-2), -0.2rem -0.2rem 1.8rem var(--white);
+        padding: 4rem;
+        display: grid;
+        grid-template-columns: repeat(autofit, min-content);
+        grid-template-rows: repeat(autofit, -webkit-min-content);
+        grid-template-rows: repeat(autofit, min-content);
+        grid-column-gap: 1.5rem;
+        grid-row-gap: 2.5rem;
+        align-items: center;
+    }
+    .components2 {
+        width: 60%;
+        height: 60%;
+        border-radius: 3rem;
+        box-shadow: 0.8rem 0.8rem 1.4rem var(--greyLight-2), -0.2rem -0.2rem 1.8rem var(--white);
+        padding: 4rem;
+        display: grid;
+        grid-template-columns: repeat(autofit, min-content);
+        grid-template-rows: repeat(autofit, -webkit-min-content);
+        grid-template-rows: repeat(autofit, min-content);
+        grid-column-gap: 1.5rem;
+        grid-row-gap: 2.5rem;
+        align-items: center;
+        display: none;
+    }
+    .wrapper {
+        width: inherit;
+        height: inherit;
+        grid-template-columns: repeat(autofit, min-content);
+        grid-template-rows: repeat(autofit, -webkit-min-content);
+        grid-template-rows: repeat(autofit, min-content);
+        grid-column-gap: 1.5rem;
+        grid-row-gap: 2.5rem;
+        justify-items: center;
+        margin-bottom: 5%;
+        margin-left: 31.3%;
+    }
+    /*  BUTTONS  */
+    .btn {
+        width: 15rem;
+        height: 4rem;
+        border-radius: 1rem;
+        box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        justify-self: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.3s ease;
+    }
+    .btn__primary {
+        grid-column: 1/2;
+        grid-row: 3/5;
+        background: var(--primary);
+        box-shadow: inset 0.2rem 0.2rem 1rem var(--primary-light), inset -0.2rem -0.2rem 1rem var(--primary-dark), 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        color: var(--greyLight-1);
+    }
+    .btn__primary:hover {
+        color: var(--white);
+    }
+    .btn__primary:active {
+        box-shadow: inset 0.2rem 0.2rem 1rem var(--primary-dark), inset -0.2rem -0.2rem 1rem var(--primary-light);
+    }
+    .btn__secondary {
+        grid-column: 2/2;
+        grid-row: 3/5;
+        color: var(--greyDark);
+    }
+    .btn__secondary:hover {
+        color: var(--primary);
+    }
+    .btn__secondary:active {
+        box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+    }
+    .btn2 {
+        width: 20rem;
+        height: 6rem;
+        border-radius: 1rem;
+        box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        display: grid;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.3s ease;
+        font-size: 1.5rem;
+        margin-top: 5%;
+    }
+    .btn__secondary2 {
+        grid-column: 2/3;
+        grid-row: 1/2;
+        color: var(--greyDark);
+    }
+    .btn__secondary2:hover {
+        color: var(--primary);
+    }
+    .btn__secondary2:active {
+        box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+    }
+    .btn p {
+        font-size: 1.6rem;
+    }
+    /*  CLOCK  */
+    .clock {
+        grid-column: 1/3;
+        grid-row: 1/3;
+        width: 12rem;
+        height: 12rem;
+        justify-self: center;
+        box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+    .clock .hand {
+        position: absolute;
+        transform-origin: bottom;
+        bottom: 6rem;
+        border-radius: 0.2rem;
+        z-index: 200;
+    }
+    .clock .hours {
+        width: 0.4rem;
+        height: 3.2rem;
+        background: var(--greyLight-3);
+    }
+    .clock .minutes {
+        width: 0.4rem;
+        height: 4.6rem;
+        background: var(--greyDark);
+    }
+    .clock .seconds {
+        width: 0.2rem;
+        height: 5.2rem;
+        background: var(--primary);
+    }
+    .clock .point {
+        position: absolute;
+        width: 0.8rem;
+        height: 0.8rem;
+        border-radius: 50%;
+        background: var(--primary);
+        z-index: 300;
+    }
+    .clock .marker {
+        width: 95%;
+        height: 95%;
+        border-radius: 50%;
+        position: relative;
+        box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+    }
+    .clock .marker::after {
+        content: "";
+        width: 60%;
+        height: 60%;
+        position: absolute;
+        box-shadow: inset 1px 1px 1px var(--greyLight-2), inset -1px -1px 1px var(--white);
+        border-radius: 50%;
+        top: 20%;
+        left: 20%;
+        filter: blur(1px);
+    }
+    .clock .marker__1,
+    .clock .marker__2,
+    .clock .marker__3,
+    .clock .marker__4 {
+        position: absolute;
+        border-radius: 0.1rem;
+        box-shadow: inset 1px 1px 1px var(--greyLight-2), inset -1px -1px 1px var(--white);
+    }
+    .clock .marker__1,
+    .clock .marker__2 {
+        width: 0.2rem;
+        height: 0.6rem;
+        left: 5.6rem;
+    }
+    .clock .marker__3,
+    .clock .marker__4 {
+        width: 0.6rem;
+        height: 0.2rem;
+        top: 5.6rem;
+    }
+    .clock .marker__1 {
+        top: 2%;
+    }
+    .clock .marker__2 {
+        top: 98%;
+        transform: translateY(-0.6rem);
+    }
+    .clock .marker__3 {
+        left: 2%;
+    }
+    .clock .marker__4 {
+        left: 98%;
+        transform: translateX(-0.6rem);
+    }
+    /*  ICONS  */
+    .icon {
+        grid-column: 3/4;
+        grid-row: 4/5;
+        display: grid;
+        justify-content: center;
+    }
+    .icon2 {
+        display: none;
+    }
+    .icon2 .icon__add:hover {
+        color: #d11a2a;
+    }
+    .icon__add {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--greyDark);
+        transition: all 0.5s ease;
+    }
+    .icon__add:active {
+        box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+        color: var(--primary);
+    }
+    .icon__add:hover {
+        color: var(--primary);
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .container {
+        min-height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Poppins", sans-serif;
+        background: var(--greyLight-1);
+        padding-top: 50%;
+    }
+    .components {
+        width: 70%;
+        height: 50%;
+        border-radius: 3rem;
+        box-shadow: 0.8rem 0.8rem 1.4rem var(--greyLight-2), -0.2rem -0.2rem 1.8rem var(--white);
+        padding: 4.5rem;
+        display: grid;
+        grid-template-columns: repeat(autofit, min-content);
+        grid-template-rows: repeat(autofit, -webkit-min-content);
+        grid-template-rows: repeat(autofit, min-content);
+        grid-column-gap: 1.5rem;
+        grid-row-gap: 2.5rem;
+        align-items: center;
+    }
+    .components2 {
+        width: 70%;
+        height: 50%;
+        border-radius: 3rem;
+        box-shadow: 0.8rem 0.8rem 1.4rem var(--greyLight-2), -0.2rem -0.2rem 1.8rem var(--white);
+        padding: 4.5rem;
+        display: none;
+        grid-template-columns: repeat(autofit, min-content);
+        grid-template-rows: repeat(autofit, -webkit-min-content);
+        grid-template-rows: repeat(autofit, min-content);
+        grid-column-gap: 1.5rem;
+        grid-row-gap: 2.5rem;
+        align-items: center;
+    }
+    .wrapper {
+        width: inherit;
+        height: inherit;
+        grid-template-columns: repeat(autofit, min-content);
+        grid-template-rows: repeat(autofit, -webkit-min-content);
+        grid-template-rows: repeat(autofit, min-content);
+        grid-column-gap: 1.5rem;
+        grid-row-gap: 2.5rem;
+        justify-items: center;
+        margin-bottom: 5%;
+    }
+    /*  BUTTONS  */
+    .btn {
+        width: 15rem;
+        height: 4rem;
+        border-radius: 1rem;
+        box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        justify-self: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.3s ease;
+    }
+    .btn2 {
+        width: 20rem;
+        height: 6rem;
+        border-radius: 1rem;
+        box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        display: grid;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.3s ease;
+        font-size: 1.5rem;
+        margin-top: 5%;
+        margin-right: 10%;
+    }
+    .btn__primary {
+        grid-column: 1/2;
+        grid-row: 3/4;
+        background: var(--primary);
+        box-shadow: inset 0.2rem 0.2rem 1rem var(--primary-light), inset -0.2rem -0.2rem 1rem var(--primary-dark), 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        color: var(--greyLight-1);
+    }
+    .btn__primary:hover {
+        color: var(--white);
+    }
+    .btn__primary:active {
+        box-shadow: inset 0.2rem 0.2rem 1rem var(--primary-dark), inset -0.2rem -0.2rem 1rem var(--primary-light);
+    }
+    .btn__secondary {
+        grid-column: 1/1;
+        grid-row: 4/4;
+        color: var(--greyDark);
+    }
+    .btn__secondary:hover {
+        color: var(--primary);
+    }
+    .btn__secondary:active {
+        box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+    }
+    .btn p {
+        font-size: 1.6rem;
+    }
+    /*  CLOCK  */
+    .clock {
+        grid-column: 1/2;
+        grid-row: 1/3;
+        width: 12rem;
+        height: 12rem;
+        justify-self: center;
+        box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+    .clock .hand {
+        position: absolute;
+        transform-origin: bottom;
+        bottom: 6rem;
+        border-radius: 0.2rem;
+        z-index: 200;
+    }
+    .clock .hours {
+        width: 0.4rem;
+        height: 3.2rem;
+        background: var(--greyLight-3);
+    }
+    .clock .minutes {
+        width: 0.4rem;
+        height: 4.6rem;
+        background: var(--greyDark);
+    }
+    .clock .seconds {
+        width: 0.2rem;
+        height: 5.2rem;
+        background: var(--primary);
+    }
+    .clock .point {
+        position: absolute;
+        width: 0.8rem;
+        height: 0.8rem;
+        border-radius: 50%;
+        background: var(--primary);
+        z-index: 300;
+    }
+    .clock .marker {
+        width: 95%;
+        height: 95%;
+        border-radius: 50%;
+        position: relative;
+        box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+    }
+    .clock .marker::after {
+        content: "";
+        width: 60%;
+        height: 60%;
+        position: absolute;
+        box-shadow: inset 1px 1px 1px var(--greyLight-2), inset -1px -1px 1px var(--white);
+        border-radius: 50%;
+        top: 20%;
+        left: 20%;
+        filter: blur(1px);
+    }
+    .clock .marker__1,
+    .clock .marker__2,
+    .clock .marker__3,
+    .clock .marker__4 {
+        position: absolute;
+        border-radius: 0.1rem;
+        box-shadow: inset 1px 1px 1px var(--greyLight-2), inset -1px -1px 1px var(--white);
+    }
+    .clock .marker__1,
+    .clock .marker__2 {
+        width: 0.2rem;
+        height: 0.6rem;
+        left: 5.6rem;
+    }
+    .clock .marker__3,
+    .clock .marker__4 {
+        width: 0.6rem;
+        height: 0.2rem;
+        top: 5.6rem;
+    }
+    .clock .marker__1 {
+        top: 2%;
+    }
+    .clock .marker__2 {
+        top: 98%;
+        transform: translateY(-0.6rem);
+    }
+    .clock .marker__3 {
+        left: 2%;
+    }
+    .clock .marker__4 {
+        left: 98%;
+        transform: translateX(-0.6rem);
+    }
+    /*  ICONS  */
+    .icon {
+        grid-column: 3/4;
+        grid-row: 4/5;
+        display: grid;
+        justify-content: center;
+    }
+    .icon2 {
+        display: none;
+    }
+    .icon__add {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--greyDark);
+        transition: all 0.5s ease;
+    }
+    .icon__add:active {
+        box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+        color: var(--primary);
+    }
+    .icon__add:hover {
+        cursor: pointer;
+        color: var(--primary);
+    }
+    .icon2 .icon__add:hover {
+        cursor: pointer;
+        color: #d11a2a;
+    }
+}
+.mdtp__wrapper[data-theme='yellow'] .mdtp__time_holder { background-color: #F9A825; }
+.mdtp__wrapper[data-theme='yellow'] .mdtp__clock .mdtp__am.active,
+.mdtp__wrapper[data-theme='yellow'] .mdtp__clock .mdtp__pm.active { background-color: #F9A825; }
+.mdtp__wrapper[data-theme='yellow'] .mdtp__clock .mdtp__clock_dot { background-color: #F9A825; }
+.mdtp__wrapper[data-theme='yellow'] .mdtp__digit.active span,
+.mdtp__wrapper[data-theme='yellow'] .mdtp__clock .mdtp__digit span:hover { background-color: #F9A825 !important; }
+.mdtp__wrapper[data-theme='yellow'] .mdtp__digit.active:before { background-color: #F9A825; }
+.mdtp__wrapper[data-theme='yellow'] .mdtp__button { color: #F9A825; }
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap');
+ 
+ body[mdtimepicker-display='on'] { overflow: hidden; }
+.mdtimepicker {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	font-family: Roboto, sans-serif;
+	font-size: 14px;
+	background-color: rgba(10,10,10,.65);
+	transition: background-color .28s ease;
+	z-index: 100001;
+}
+	.mdtimepicker.hidden { display: none; }
+	.mdtimepicker.animate { background-color: transparent; }
+.mdtp__wrapper {
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	left: 50%;
+	bottom: 24px;
+	min-width: 280px;
+	opacity: 1;
+	outline: none;
+	user-select: none;
+	border-radius: 4px;
+	transform: translateX(-50%) scale(1);
+	box-shadow: 0px 11px 15px -7px rgba(0, 0, 0, 0.2), 0px 24px 38px 3px rgba(0, 0, 0, 0.14), 0px 9px 46px 8px rgba(0, 0, 0, 0.12);
+	transition: transform .28s ease, opacity .28s ease;
+	overflow: hidden;
+}
+	.mdtp__wrapper.animate {
+		transform: translateX(-50%) scale(1.05);
+		opacity: 0;
+	}
+.mdtp__time_holder {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	font-size: 46px;
+	padding: 20px 24px;
+	color: rgba(255,255,255,.5);
+	text-align: center;
+	background-color: #1565c0;
+}
+	.mdtp__time_holder > span {
+		display: inline-block;
+		line-height: 48px;
+		cursor: default;
+	}
+	.mdtp__time_holder > span:not(.mdtp__timedots):not(.mdtp__ampm) {
+		cursor: pointer;
+		margin: 0 4px;
+	}
+	.mdtp__time_holder .mdtp__time_h.active, .mdtp__time_holder .mdtp__time_m.active { color: #fafafa; }
+	.mdtp__time_holder .mdtp__ampm { font-size: 18px; }
+.mdtp__clock_holder {
+	position: relative;
+	background-color: #fff;
+}
+.mdtp__clock_holder .mdtp__clock {
+	position: relative;
+	width: 250px;
+	height: 250px;
+	margin: 20px;
+	border-radius: 50%;
+	background-color: #eee;
+}
+.mdtp__clock .mdtp__am, .mdtp__clock .mdtp__pm {
+	display: block;
+	position: absolute;
+	bottom: -8px;
+	width: 36px;
+	height: 36px;
+	line-height: 36px;
+	text-align: center;
+	cursor: pointer;
+	border-radius: 50%;
+	border: 1px solid rgba(0,0,0,.1);
+	background: rgba(0,0,0,.05);
+	transition: background-color .2s ease, color .2s;
+	z-index: 3;
+}
+	.mdtp__clock .mdtp__am { left: -8px; }
+	.mdtp__clock .mdtp__pm { right: -8px; }
+	.mdtp__clock .mdtp__am:hover, .mdtp__clock .mdtp__pm:hover { background-color: rgba(0,0,0,.1); }
+	.mdtp__clock .mdtp__am.active, .mdtp__clock .mdtp__pm.active {
+		color: #fafafa;
+		background-color: #1565c0;
+	}
+.mdtp__clock .mdtp__clock_dot {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	padding: 4px;
+	background-color: #1565c0;
+	border-radius: 50%;
+}
+.mdtp__clock .mdtp__hour_holder,
+.mdtp__clock .mdtp__minute_holder {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 1;
+	transform: scale(1);
+	transition: transform .35s cubic-bezier(0.4, 0.0, 0.2, 1), opacity .35s ease;
+	overflow: hidden;
+}
+	.mdtp__clock .mdtp__hour_holder.animate {
+		transform: scale(1.2);
+		opacity: 0;
+	}
+	.mdtp__clock .mdtp__minute_holder.animate {
+		transform: scale(.8);
+		opacity: 0;
+	}
+	.mdtp__clock .mdtp__hour_holder.hidden, .mdtp__clock .mdtp__minute_holder.hidden { display: none; }
+.mdtp__clock .mdtp__digit {
+	position: absolute;
+	width: 50%;
+	top: 50%;
+	left: 0;
+	margin-top: -16px;
+	transform-origin: right center;
+	z-index: 1;
+}
+	.mdtp__clock .mdtp__digit.inner--digit {
+		width: 36%;
+		left: 14%;
+		z-index: 2;
+	}
+	.mdtp__clock .mdtp__digit span { 
+		display: inline-block;
+		width: 32px;
+		height: 32px;
+		line-height: 32px;
+		margin-left: 8px;
+		text-align: center;
+		border-radius: 50%;
+		cursor: pointer;
+		transition: background-color .28s, color .14s;
+	}
+		.mdtp__digit.active span,
+		.mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover {
+			background-color: #1565c0 !important;
+			color: #fff;
+			z-index: 2;
+		}
+		.mdtp__digit.digit--disabled span {
+			color: rgb(200,200,200);
+			cursor: not-allowed;
+			background-color: transparent !important;
+		}
+
+.mdtp__digit.active:before {
+	content: '';
+	display: block;
+	position: absolute;
+	top: calc(50% - 1px);
+	right: 0;
+	height: 2px;
+	width: calc(100% - 40px);
+	background-color: #1565c0;
+}
+.mdtp__clock .mdtp__minute_holder .mdtp__digit { font-size: 13px; }
+.mdtp__clock .mdtp__minute_holder .mdtp__digit:not(.marker) {
+	margin-top: -6px;
+	height: 12px;
+}
+	.mdtp__clock .mdtp__minute_holder .mdtp__digit:not(.marker).active:before { width: calc(100% - 26px); }
+	.mdtp__clock .mdtp__minute_holder .mdtp__digit:not(.marker) span {
+		width: 12px;
+		height: 12px;
+		line-height: 12px;
+		margin-left: 14px;
+	}
+.mdtp__clock .mdtp__minute_holder .mdtp__digit.marker { margin-top: -12px; }
+	.mdtp__clock .mdtp__minute_holder .mdtp__digit.marker.active:before { width: calc(100% - 34px); }
+	.mdtp__clock .mdtp__minute_holder .mdtp__digit.marker span {
+		width: 24px;
+		height: 24px;
+		line-height: 24px;
+		margin-left: 10px;
+	}
+.mdtp__digit.rotate--15 { transform: rotate(-15deg); } .mdtp__digit.rotate--15 span { transform: rotate(15deg); }
+.mdtp__digit.rotate-6 { transform: rotate(6deg); } .mdtp__digit.rotate-6 span { transform: rotate(-6deg); }
+.mdtp__digit.rotate-12 { transform: rotate(12deg); } .mdtp__digit.rotate-12 span { transform: rotate(-12deg); }
+.mdtp__digit.rotate-15 { transform: rotate(15deg); } .mdtp__digit.rotate-15 span { transform: rotate(-15deg); }
+.mdtp__digit.rotate-18 { transform: rotate(18deg); } .mdtp__digit.rotate-18 span { transform: rotate(-18deg); }
+.mdtp__digit.rotate-24 { transform: rotate(24deg); } .mdtp__digit.rotate-24 span { transform: rotate(-24deg); }
+.mdtp__digit.rotate-30 { transform: rotate(30deg); } .mdtp__digit.rotate-30 span { transform: rotate(-30deg); }
+.mdtp__digit.rotate-36 { transform: rotate(36deg); } .mdtp__digit.rotate-36 span { transform: rotate(-36deg); }
+.mdtp__digit.rotate-42 { transform: rotate(42deg); } .mdtp__digit.rotate-42 span { transform: rotate(-42deg); }
+.mdtp__digit.rotate-45 { transform: rotate(45deg); } .mdtp__digit.rotate-45 span { transform: rotate(-45deg); }
+.mdtp__digit.rotate-48 { transform: rotate(48deg); } .mdtp__digit.rotate-48 span { transform: rotate(-48deg); }
+.mdtp__digit.rotate-54 { transform: rotate(54deg); } .mdtp__digit.rotate-54 span { transform: rotate(-54deg); }
+.mdtp__digit.rotate-60 { transform: rotate(60deg); } .mdtp__digit.rotate-60 span { transform: rotate(-60deg); }
+.mdtp__digit.rotate-66 { transform: rotate(66deg); } .mdtp__digit.rotate-66 span { transform: rotate(-66deg); }
+.mdtp__digit.rotate-72 { transform: rotate(72deg); } .mdtp__digit.rotate-72 span { transform: rotate(-72deg); }
+.mdtp__digit.rotate-75 { transform: rotate(75deg); } .mdtp__digit.rotate-75 span { transform: rotate(-75deg); }
+.mdtp__digit.rotate-78 { transform: rotate(78deg); } .mdtp__digit.rotate-78 span { transform: rotate(-78deg); }
+.mdtp__digit.rotate-84 { transform: rotate(84deg); } .mdtp__digit.rotate-84 span { transform: rotate(-84deg); }
+.mdtp__digit.rotate-90 { transform: rotate(90deg); } .mdtp__digit.rotate-90 span { transform: rotate(-90deg); }
+.mdtp__digit.rotate-96 { transform: rotate(96deg); } .mdtp__digit.rotate-96 span { transform: rotate(-96deg); }
+.mdtp__digit.rotate-102 { transform: rotate(102deg); } .mdtp__digit.rotate-102 span { transform: rotate(-102deg); }
+.mdtp__digit.rotate-105 { transform: rotate(105deg); } .mdtp__digit.rotate-105 span { transform: rotate(-105deg); }
+.mdtp__digit.rotate-108 { transform: rotate(108deg); } .mdtp__digit.rotate-108 span { transform: rotate(-108deg); }
+.mdtp__digit.rotate-114 { transform: rotate(114deg); } .mdtp__digit.rotate-114 span { transform: rotate(-114deg); }
+.mdtp__digit.rotate-120 { transform: rotate(120deg); } .mdtp__digit.rotate-120 span { transform: rotate(-120deg); }
+.mdtp__digit.rotate-126 { transform: rotate(126deg); } .mdtp__digit.rotate-126 span { transform: rotate(-126deg); }
+.mdtp__digit.rotate-132 { transform: rotate(132deg); } .mdtp__digit.rotate-132 span { transform: rotate(-132deg); }
+.mdtp__digit.rotate-135 { transform: rotate(135deg); } .mdtp__digit.rotate-135 span { transform: rotate(-135deg); }
+.mdtp__digit.rotate-138 { transform: rotate(138deg); } .mdtp__digit.rotate-138 span { transform: rotate(-138deg); }
+.mdtp__digit.rotate-144 { transform: rotate(144deg); } .mdtp__digit.rotate-144 span { transform: rotate(-144deg); }
+.mdtp__digit.rotate-150 { transform: rotate(150deg); } .mdtp__digit.rotate-150 span { transform: rotate(-150deg); }
+.mdtp__digit.rotate-156 { transform: rotate(156deg); } .mdtp__digit.rotate-156 span { transform: rotate(-156deg); }
+.mdtp__digit.rotate-162 { transform: rotate(162deg); } .mdtp__digit.rotate-162 span { transform: rotate(-162deg); }
+.mdtp__digit.rotate-165 { transform: rotate(165deg); } .mdtp__digit.rotate-165 span { transform: rotate(-165deg); }
+.mdtp__digit.rotate-168 { transform: rotate(168deg); } .mdtp__digit.rotate-168 span { transform: rotate(-168deg); }
+.mdtp__digit.rotate-174 { transform: rotate(174deg); } .mdtp__digit.rotate-174 span { transform: rotate(-174deg); }
+.mdtp__digit.rotate-180 { transform: rotate(180deg); } .mdtp__digit.rotate-180 span { transform: rotate(-180deg); }
+.mdtp__digit.rotate-186 { transform: rotate(186deg); } .mdtp__digit.rotate-186 span { transform: rotate(-186deg); }
+.mdtp__digit.rotate-192 { transform: rotate(192deg); } .mdtp__digit.rotate-192 span { transform: rotate(-192deg); }
+.mdtp__digit.rotate-195 { transform: rotate(195deg); } .mdtp__digit.rotate-195 span { transform: rotate(-195deg); }
+.mdtp__digit.rotate-198 { transform: rotate(198deg); } .mdtp__digit.rotate-198 span { transform: rotate(-198deg); }
+.mdtp__digit.rotate-204 { transform: rotate(204deg); } .mdtp__digit.rotate-204 span { transform: rotate(-204deg); }
+.mdtp__digit.rotate-210 { transform: rotate(210deg); } .mdtp__digit.rotate-210 span { transform: rotate(-210deg); }
+.mdtp__digit.rotate-216 { transform: rotate(216deg); } .mdtp__digit.rotate-216 span { transform: rotate(-216deg); }
+.mdtp__digit.rotate-222 { transform: rotate(222deg); } .mdtp__digit.rotate-222 span { transform: rotate(-222deg); }
+.mdtp__digit.rotate-225 { transform: rotate(225deg); } .mdtp__digit.rotate-225 span { transform: rotate(-225deg); }
+.mdtp__digit.rotate-228 { transform: rotate(228deg); } .mdtp__digit.rotate-228 span { transform: rotate(-228deg); }
+.mdtp__digit.rotate-234 { transform: rotate(234deg); } .mdtp__digit.rotate-234 span { transform: rotate(-234deg); }
+.mdtp__digit.rotate-240 { transform: rotate(240deg); } .mdtp__digit.rotate-240 span { transform: rotate(-240deg); }
+.mdtp__digit.rotate-246 { transform: rotate(246deg); } .mdtp__digit.rotate-246 span { transform: rotate(-246deg); }
+.mdtp__digit.rotate-252 { transform: rotate(252deg); } .mdtp__digit.rotate-252 span { transform: rotate(-252deg); }
+.mdtp__digit.rotate-255 { transform: rotate(255deg); } .mdtp__digit.rotate-255 span { transform: rotate(-255deg); }
+.mdtp__digit.rotate-258 { transform: rotate(258deg); } .mdtp__digit.rotate-258 span { transform: rotate(-258deg); }
+.mdtp__digit.rotate-264 { transform: rotate(264deg); } .mdtp__digit.rotate-264 span { transform: rotate(-264deg); }
+.mdtp__digit.rotate-270 { transform: rotate(270deg); } .mdtp__digit.rotate-270 span { transform: rotate(-270deg); }
+.mdtp__digit.rotate-276 { transform: rotate(276deg); } .mdtp__digit.rotate-276 span { transform: rotate(-276deg); }
+.mdtp__digit.rotate-282 { transform: rotate(282deg); } .mdtp__digit.rotate-282 span { transform: rotate(-282deg); }
+.mdtp__digit.rotate-285 { transform: rotate(285deg); } .mdtp__digit.rotate-285 span { transform: rotate(-285deg); }
+.mdtp__digit.rotate-288 { transform: rotate(288deg); } .mdtp__digit.rotate-288 span { transform: rotate(-288deg); }
+.mdtp__digit.rotate-294 { transform: rotate(294deg); } .mdtp__digit.rotate-294 span { transform: rotate(-294deg); }
+.mdtp__digit.rotate-300 { transform: rotate(300deg); } .mdtp__digit.rotate-300 span { transform: rotate(-300deg); }
+.mdtp__digit.rotate-306 { transform: rotate(306deg); } .mdtp__digit.rotate-306 span { transform: rotate(-306deg); }
+.mdtp__digit.rotate-312 { transform: rotate(312deg); } .mdtp__digit.rotate-312 span { transform: rotate(-312deg); }
+.mdtp__digit.rotate-315 { transform: rotate(315deg); } .mdtp__digit.rotate-315 span { transform: rotate(-315deg); }
+.mdtp__digit.rotate-318 { transform: rotate(318deg); } .mdtp__digit.rotate-318 span { transform: rotate(-318deg); }
+.mdtp__digit.rotate-324 { transform: rotate(324deg); } .mdtp__digit.rotate-324 span { transform: rotate(-324deg); }
+.mdtp__digit.rotate-330 { transform: rotate(330deg); } .mdtp__digit.rotate-330 span { transform: rotate(-330deg); }
+.mdtp__digit.rotate-336 { transform: rotate(336deg); } .mdtp__digit.rotate-336 span { transform: rotate(-336deg); }
+.mdtp__digit.rotate-342 { transform: rotate(342deg); } .mdtp__digit.rotate-342 span { transform: rotate(-342deg); }
+.mdtp__digit.rotate-348 { transform: rotate(348deg); } .mdtp__digit.rotate-348 span { transform: rotate(-348deg); }
+.mdtp__digit.rotate-354 { transform: rotate(354deg); } .mdtp__digit.rotate-354 span { transform: rotate(-354deg); }
+.mdtp__digit.rotate-360 { transform: rotate(360deg); } .mdtp__digit.rotate-360 span { transform: rotate(-360deg); }
+
+.mdtp__buttons {
+	padding: 0 10px 10px;
+	text-align: right;
+}
+	.mdtp__buttons:after {
+		content: '';
+		display: block;
+		clear: both;
+	}
+.mdtp__button {
+	display: inline-block;
+	padding: 0 16px;
+	min-width: 40px;
+	text-align: center;
+	text-transform: uppercase;
+	line-height: 32px;
+	font-weight: 500;
+	cursor: pointer;
+	color: #1565c0;
+	border-radius: 4px;
+	transition: background-color .2s linear;
+}
+.mdtp__button:hover { background-color: rgba(0,0,0,.1); }
+.mdtp__button:active { background-color: rgba(0,0,0,.2); }
+.mdtp__button.clear-btn {
+	float: left;
+	color: #ef5350 !important;
+}
+
+/* Color themes */
+.mdtp__wrapper[data-theme='blue'] .mdtp__time_holder { background-color: #1565c0; }
+.mdtp__wrapper[data-theme='blue'] .mdtp__clock .mdtp__am.active,
+.mdtp__wrapper[data-theme='blue'] .mdtp__clock .mdtp__pm.active { background-color: #1565c0; }
+.mdtp__wrapper[data-theme='blue'] .mdtp__clock .mdtp__clock_dot { background-color: #1565c0; }
+.mdtp__wrapper[data-theme='blue'] .mdtp__digit.active span,
+.mdtp__wrapper[data-theme='blue'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover { background-color: #1565c0 !important; }
+.mdtp__wrapper[data-theme='blue'] .mdtp__digit.active:before { background-color: #1565c0; }
+.mdtp__wrapper[data-theme='blue'] .mdtp__button { color: #1565c0; }
+
+.mdtp__wrapper[data-theme='red'] .mdtp__time_holder { background-color: #c62828; }
+.mdtp__wrapper[data-theme='red'] .mdtp__clock .mdtp__am.active,
+.mdtp__wrapper[data-theme='red'] .mdtp__clock .mdtp__pm.active { background-color: #c62828; }
+.mdtp__wrapper[data-theme='red'] .mdtp__clock .mdtp__clock_dot { background-color: #c62828; }
+.mdtp__wrapper[data-theme='red'] .mdtp__digit.active span,
+.mdtp__wrapper[data-theme='red'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover { background-color: #c62828 !important; }
+.mdtp__wrapper[data-theme='red'] .mdtp__digit.active:before { background-color: #c62828; }
+.mdtp__wrapper[data-theme='red'] .mdtp__button { color: #c62828; }
+
+.mdtp__wrapper[data-theme='purple'] .mdtp__time_holder { background-color: #6a1b9a; }
+.mdtp__wrapper[data-theme='purple'] .mdtp__clock .mdtp__am.active,
+.mdtp__wrapper[data-theme='purple'] .mdtp__clock .mdtp__pm.active { background-color: #6a1b9a; }
+.mdtp__wrapper[data-theme='purple'] .mdtp__clock .mdtp__clock_dot { background-color: #6a1b9a; }
+.mdtp__wrapper[data-theme='purple'] .mdtp__digit.active span,
+.mdtp__wrapper[data-theme='purple'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover { background-color: #6a1b9a !important; }
+.mdtp__wrapper[data-theme='purple'] .mdtp__digit.active:before { background-color: #6a1b9a; }
+.mdtp__wrapper[data-theme='purple'] .mdtp__button { color: #6a1b9a; }
+
+.mdtp__wrapper[data-theme='indigo'] .mdtp__time_holder { background-color: #283593; }
+.mdtp__wrapper[data-theme='indigo'] .mdtp__clock .mdtp__am.active,
+.mdtp__wrapper[data-theme='indigo'] .mdtp__clock .mdtp__pm.active { background-color: #283593; }
+.mdtp__wrapper[data-theme='indigo'] .mdtp__clock .mdtp__clock_dot { background-color: #283593; }
+.mdtp__wrapper[data-theme='indigo'] .mdtp__digit.active span,
+.mdtp__wrapper[data-theme='indigo'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover { background-color: #283593 !important; }
+.mdtp__wrapper[data-theme='indigo'] .mdtp__digit.active:before { background-color: #283593; }
+.mdtp__wrapper[data-theme='indigo'] .mdtp__button { color: #283593; }
+
+.mdtp__wrapper[data-theme='teal'] .mdtp__time_holder { background-color: #00695c; }
+.mdtp__wrapper[data-theme='teal'] .mdtp__clock .mdtp__am.active,
+.mdtp__wrapper[data-theme='teal'] .mdtp__clock .mdtp__pm.active { background-color: #00695c; }
+.mdtp__wrapper[data-theme='teal'] .mdtp__clock .mdtp__clock_dot { background-color: #00695c; }
+.mdtp__wrapper[data-theme='teal'] .mdtp__digit.active span,
+.mdtp__wrapper[data-theme='teal'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover { background-color: #00695c !important; }
+.mdtp__wrapper[data-theme='teal'] .mdtp__digit.active:before { background-color: #00695c; }
+.mdtp__wrapper[data-theme='teal'] .mdtp__button { color: #00695c; }
+
+.mdtp__wrapper[data-theme='green'] .mdtp__time_holder { background-color: #2e7d32; }
+.mdtp__wrapper[data-theme='green'] .mdtp__clock .mdtp__am.active,
+.mdtp__wrapper[data-theme='green'] .mdtp__clock .mdtp__pm.active { background-color: #2e7d32; }
+.mdtp__wrapper[data-theme='green'] .mdtp__clock .mdtp__clock_dot { background-color: #2e7d32; }
+.mdtp__wrapper[data-theme='green'] .mdtp__digit.active span,
+.mdtp__wrapper[data-theme='green'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover { background-color: #2e7d32 !important; }
+.mdtp__wrapper[data-theme='green'] .mdtp__digit.active:before { background-color: #2e7d32; }
+.mdtp__wrapper[data-theme='green'] .mdtp__button { color: #2e7d32; }
+
+.mdtp__wrapper[data-theme='dark'] .mdtp__time_holder { background-color: #121212; }
+.mdtp__wrapper[data-theme='dark'] .mdtp__clock_holder { background-color: rgb(29,29,29); }
+.mdtp__wrapper[data-theme='dark'] .mdtp__clock_holder .mdtp__clock { background-color: rgb(24,24,24); }
+.mdtp__wrapper[data-theme='dark'] .mdtp__clock .mdtp__digit:not(.digit--disabled) { color: rgba(255,255,255,.87); }
+.mdtp__wrapper[data-theme='dark'] .mdtp__clock .mdtp__digit.digit--disabled span { color: rgba(100,100,100,.87); }
+.mdtp__wrapper[data-theme='dark'] .mdtp__clock .mdtp__am:not(.active), 
+.mdtp__wrapper[data-theme='dark'] .mdtp__clock .mdtp__pm:not(.active) {
+	color: rgba(255,255,255,.87);
+	background-color: rgba(200,200,200,.05);
+}
+.mdtp__wrapper[data-theme='dark'] .mdtp__button { color: #42a5f5;  }
+.mdtp__wrapper[data-theme='dark'] .mdtp__button:hover { background-color: rgba(255,255,255,.04); }
+.mdtp__wrapper[data-theme='dark'] .mdtp__button:active { background-color: rgba(255,255,255,.1); }
+
+@media (max-height: 360px) {
+	.mdtp__wrapper {
+		flex-direction: row;
+		bottom: 8px;
+	}
+	.mdtp__time_holder { 
+		width: 160px;
+		padding: 20px;
+	}
+	/* .mdtp__clock_holder { padding: 16px; } */
+	.mdtp__clock .mdtp__am, .mdtp__clock .mdtp__pm { bottom: -4px; }
+	.mdtp__clock .mdtp__am { left: -4px; }
+	.mdtp__clock .mdtp__pm { right: -4px; }
+}
+@media (max-height: 320px) {
+	.mdtp__wrapper { bottom: 0; }
+}
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap);body[mdtimepicker-display='on']{overflow:hidden}.mdtimepicker{position:fixed;top:0;left:0;right:0;bottom:0;font-family:Roboto,sans-serif;font-size:14px;background-color:rgba(10,10,10,.65);transition:background-color .28s ease;z-index:100001}.mdtimepicker.hidden{display:none}.mdtimepicker.animate{background-color:transparent}.mdtp__wrapper{position:absolute;display:flex;flex-direction:column;left:50%;bottom:24px;min-width:280px;opacity:1;outline:none;user-select:none;border-radius:4px;transform:translateX(-50%) scale(1);box-shadow:0 11px 15px -7px rgba(0,0,0,.2),0 24px 38px 3px rgba(0,0,0,.14),0 9px 46px 8px rgba(0,0,0,.12);transition:transform .28s ease,opacity .28s ease;overflow:hidden}.mdtp__wrapper.animate{transform:translateX(-50%) scale(1.05);opacity:0}.mdtp__time_holder{display:flex;flex-direction:row;align-items:center;justify-content:center;font-size:46px;padding:20px 24px;color:rgba(255,255,255,.5);text-align:center;background-color:#1565c0}.mdtp__time_holder>span{display:inline-block;line-height:48px;cursor:default}.mdtp__time_holder>span:not(.mdtp__timedots):not(.mdtp__ampm){cursor:pointer;margin:0 4px}.mdtp__time_holder .mdtp__time_h.active,.mdtp__time_holder .mdtp__time_m.active{color:#fafafa}.mdtp__time_holder .mdtp__ampm{font-size:18px}.mdtp__clock_holder{position:relative;background-color:#fff}.mdtp__clock_holder .mdtp__clock{position:relative;width:250px;height:250px;margin:20px;border-radius:50%;background-color:#eee}.mdtp__clock .mdtp__am,.mdtp__clock .mdtp__pm{display:block;position:absolute;bottom:-8px;width:36px;height:36px;line-height:36px;text-align:center;cursor:pointer;border-radius:50%;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.05);transition:background-color .2s ease,color .2s;z-index:3}.mdtp__clock .mdtp__am{left:-8px}.mdtp__clock .mdtp__pm{right:-8px}.mdtp__clock .mdtp__am:hover,.mdtp__clock .mdtp__pm:hover{background-color:rgba(0,0,0,.1)}.mdtp__clock .mdtp__am.active,.mdtp__clock .mdtp__pm.active{color:#fafafa;background-color:#1565c0}.mdtp__clock .mdtp__clock_dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:4px;background-color:#1565c0;border-radius:50%}.mdtp__clock .mdtp__hour_holder,.mdtp__clock .mdtp__minute_holder{position:absolute;top:0;width:100%;height:100%;opacity:1;transform:scale(1);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s ease;overflow:hidden}.mdtp__clock .mdtp__hour_holder.animate{transform:scale(1.2);opacity:0}.mdtp__clock .mdtp__minute_holder.animate{transform:scale(.8);opacity:0}.mdtp__clock .mdtp__hour_holder.hidden,.mdtp__clock .mdtp__minute_holder.hidden{display:none}.mdtp__clock .mdtp__digit{position:absolute;width:50%;top:50%;left:0;margin-top:-16px;transform-origin:right center;z-index:1}.mdtp__clock .mdtp__digit.inner--digit{width:36%;left:14%;z-index:2}.mdtp__clock .mdtp__digit span{display:inline-block;width:32px;height:32px;line-height:32px;margin-left:8px;text-align:center;border-radius:50%;cursor:pointer;transition:background-color .28s,color .14s}.mdtp__digit.active span,.mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover{background-color:#1565c0!important;color:#fff;z-index:2}.mdtp__digit.digit--disabled span{color:rgb(200,200,200);cursor:not-allowed;background-color:transparent!important}.mdtp__digit.active:before{content:'';display:block;position:absolute;top:calc(50% - 1px);right:0;height:2px;width:calc(100% - 40px);background-color:#1565c0}.mdtp__clock .mdtp__minute_holder .mdtp__digit{font-size:13px}.mdtp__clock .mdtp__minute_holder .mdtp__digit:not(.marker){margin-top:-6px;height:12px}.mdtp__clock .mdtp__minute_holder .mdtp__digit:not(.marker).active:before{width:calc(100% - 26px)}.mdtp__clock .mdtp__minute_holder .mdtp__digit:not(.marker) span{width:12px;height:12px;line-height:12px;margin-left:14px}.mdtp__clock .mdtp__minute_holder .mdtp__digit.marker{margin-top:-12px}.mdtp__clock .mdtp__minute_holder .mdtp__digit.marker.active:before{width:calc(100% - 34px)}.mdtp__clock .mdtp__minute_holder .mdtp__digit.marker span{width:24px;height:24px;line-height:24px;margin-left:10px}.mdtp__digit.rotate--15{transform:rotate(-15deg)}.mdtp__digit.rotate--15 span{transform:rotate(15deg)}.mdtp__digit.rotate-6{transform:rotate(6deg)}.mdtp__digit.rotate-6 span{transform:rotate(-6deg)}.mdtp__digit.rotate-12{transform:rotate(12deg)}.mdtp__digit.rotate-12 span{transform:rotate(-12deg)}.mdtp__digit.rotate-15{transform:rotate(15deg)}.mdtp__digit.rotate-15 span{transform:rotate(-15deg)}.mdtp__digit.rotate-18{transform:rotate(18deg)}.mdtp__digit.rotate-18 span{transform:rotate(-18deg)}.mdtp__digit.rotate-24{transform:rotate(24deg)}.mdtp__digit.rotate-24 span{transform:rotate(-24deg)}.mdtp__digit.rotate-30{transform:rotate(30deg)}.mdtp__digit.rotate-30 span{transform:rotate(-30deg)}.mdtp__digit.rotate-36{transform:rotate(36deg)}.mdtp__digit.rotate-36 span{transform:rotate(-36deg)}.mdtp__digit.rotate-42{transform:rotate(42deg)}.mdtp__digit.rotate-42 span{transform:rotate(-42deg)}.mdtp__digit.rotate-45{transform:rotate(45deg)}.mdtp__digit.rotate-45 span{transform:rotate(-45deg)}.mdtp__digit.rotate-48{transform:rotate(48deg)}.mdtp__digit.rotate-48 span{transform:rotate(-48deg)}.mdtp__digit.rotate-54{transform:rotate(54deg)}.mdtp__digit.rotate-54 span{transform:rotate(-54deg)}.mdtp__digit.rotate-60{transform:rotate(60deg)}.mdtp__digit.rotate-60 span{transform:rotate(-60deg)}.mdtp__digit.rotate-66{transform:rotate(66deg)}.mdtp__digit.rotate-66 span{transform:rotate(-66deg)}.mdtp__digit.rotate-72{transform:rotate(72deg)}.mdtp__digit.rotate-72 span{transform:rotate(-72deg)}.mdtp__digit.rotate-75{transform:rotate(75deg)}.mdtp__digit.rotate-75 span{transform:rotate(-75deg)}.mdtp__digit.rotate-78{transform:rotate(78deg)}.mdtp__digit.rotate-78 span{transform:rotate(-78deg)}.mdtp__digit.rotate-84{transform:rotate(84deg)}.mdtp__digit.rotate-84 span{transform:rotate(-84deg)}.mdtp__digit.rotate-90{transform:rotate(90deg)}.mdtp__digit.rotate-90 span{transform:rotate(-90deg)}.mdtp__digit.rotate-96{transform:rotate(96deg)}.mdtp__digit.rotate-96 span{transform:rotate(-96deg)}.mdtp__digit.rotate-102{transform:rotate(102deg)}.mdtp__digit.rotate-102 span{transform:rotate(-102deg)}.mdtp__digit.rotate-105{transform:rotate(105deg)}.mdtp__digit.rotate-105 span{transform:rotate(-105deg)}.mdtp__digit.rotate-108{transform:rotate(108deg)}.mdtp__digit.rotate-108 span{transform:rotate(-108deg)}.mdtp__digit.rotate-114{transform:rotate(114deg)}.mdtp__digit.rotate-114 span{transform:rotate(-114deg)}.mdtp__digit.rotate-120{transform:rotate(120deg)}.mdtp__digit.rotate-120 span{transform:rotate(-120deg)}.mdtp__digit.rotate-126{transform:rotate(126deg)}.mdtp__digit.rotate-126 span{transform:rotate(-126deg)}.mdtp__digit.rotate-132{transform:rotate(132deg)}.mdtp__digit.rotate-132 span{transform:rotate(-132deg)}.mdtp__digit.rotate-135{transform:rotate(135deg)}.mdtp__digit.rotate-135 span{transform:rotate(-135deg)}.mdtp__digit.rotate-138{transform:rotate(138deg)}.mdtp__digit.rotate-138 span{transform:rotate(-138deg)}.mdtp__digit.rotate-144{transform:rotate(144deg)}.mdtp__digit.rotate-144 span{transform:rotate(-144deg)}.mdtp__digit.rotate-150{transform:rotate(150deg)}.mdtp__digit.rotate-150 span{transform:rotate(-150deg)}.mdtp__digit.rotate-156{transform:rotate(156deg)}.mdtp__digit.rotate-156 span{transform:rotate(-156deg)}.mdtp__digit.rotate-162{transform:rotate(162deg)}.mdtp__digit.rotate-162 span{transform:rotate(-162deg)}.mdtp__digit.rotate-165{transform:rotate(165deg)}.mdtp__digit.rotate-165 span{transform:rotate(-165deg)}.mdtp__digit.rotate-168{transform:rotate(168deg)}.mdtp__digit.rotate-168 span{transform:rotate(-168deg)}.mdtp__digit.rotate-174{transform:rotate(174deg)}.mdtp__digit.rotate-174 span{transform:rotate(-174deg)}.mdtp__digit.rotate-180{transform:rotate(180deg)}.mdtp__digit.rotate-180 span{transform:rotate(-180deg)}.mdtp__digit.rotate-186{transform:rotate(186deg)}.mdtp__digit.rotate-186 span{transform:rotate(-186deg)}.mdtp__digit.rotate-192{transform:rotate(192deg)}.mdtp__digit.rotate-192 span{transform:rotate(-192deg)}.mdtp__digit.rotate-195{transform:rotate(195deg)}.mdtp__digit.rotate-195 span{transform:rotate(-195deg)}.mdtp__digit.rotate-198{transform:rotate(198deg)}.mdtp__digit.rotate-198 span{transform:rotate(-198deg)}.mdtp__digit.rotate-204{transform:rotate(204deg)}.mdtp__digit.rotate-204 span{transform:rotate(-204deg)}.mdtp__digit.rotate-210{transform:rotate(210deg)}.mdtp__digit.rotate-210 span{transform:rotate(-210deg)}.mdtp__digit.rotate-216{transform:rotate(216deg)}.mdtp__digit.rotate-216 span{transform:rotate(-216deg)}.mdtp__digit.rotate-222{transform:rotate(222deg)}.mdtp__digit.rotate-222 span{transform:rotate(-222deg)}.mdtp__digit.rotate-225{transform:rotate(225deg)}.mdtp__digit.rotate-225 span{transform:rotate(-225deg)}.mdtp__digit.rotate-228{transform:rotate(228deg)}.mdtp__digit.rotate-228 span{transform:rotate(-228deg)}.mdtp__digit.rotate-234{transform:rotate(234deg)}.mdtp__digit.rotate-234 span{transform:rotate(-234deg)}.mdtp__digit.rotate-240{transform:rotate(240deg)}.mdtp__digit.rotate-240 span{transform:rotate(-240deg)}.mdtp__digit.rotate-246{transform:rotate(246deg)}.mdtp__digit.rotate-246 span{transform:rotate(-246deg)}.mdtp__digit.rotate-252{transform:rotate(252deg)}.mdtp__digit.rotate-252 span{transform:rotate(-252deg)}.mdtp__digit.rotate-255{transform:rotate(255deg)}.mdtp__digit.rotate-255 span{transform:rotate(-255deg)}.mdtp__digit.rotate-258{transform:rotate(258deg)}.mdtp__digit.rotate-258 span{transform:rotate(-258deg)}.mdtp__digit.rotate-264{transform:rotate(264deg)}.mdtp__digit.rotate-264 span{transform:rotate(-264deg)}.mdtp__digit.rotate-270{transform:rotate(270deg)}.mdtp__digit.rotate-270 span{transform:rotate(-270deg)}.mdtp__digit.rotate-276{transform:rotate(276deg)}.mdtp__digit.rotate-276 span{transform:rotate(-276deg)}.mdtp__digit.rotate-282{transform:rotate(282deg)}.mdtp__digit.rotate-282 span{transform:rotate(-282deg)}.mdtp__digit.rotate-285{transform:rotate(285deg)}.mdtp__digit.rotate-285 span{transform:rotate(-285deg)}.mdtp__digit.rotate-288{transform:rotate(288deg)}.mdtp__digit.rotate-288 span{transform:rotate(-288deg)}.mdtp__digit.rotate-294{transform:rotate(294deg)}.mdtp__digit.rotate-294 span{transform:rotate(-294deg)}.mdtp__digit.rotate-300{transform:rotate(300deg)}.mdtp__digit.rotate-300 span{transform:rotate(-300deg)}.mdtp__digit.rotate-306{transform:rotate(306deg)}.mdtp__digit.rotate-306 span{transform:rotate(-306deg)}.mdtp__digit.rotate-312{transform:rotate(312deg)}.mdtp__digit.rotate-312 span{transform:rotate(-312deg)}.mdtp__digit.rotate-315{transform:rotate(315deg)}.mdtp__digit.rotate-315 span{transform:rotate(-315deg)}.mdtp__digit.rotate-318{transform:rotate(318deg)}.mdtp__digit.rotate-318 span{transform:rotate(-318deg)}.mdtp__digit.rotate-324{transform:rotate(324deg)}.mdtp__digit.rotate-324 span{transform:rotate(-324deg)}.mdtp__digit.rotate-330{transform:rotate(330deg)}.mdtp__digit.rotate-330 span{transform:rotate(-330deg)}.mdtp__digit.rotate-336{transform:rotate(336deg)}.mdtp__digit.rotate-336 span{transform:rotate(-336deg)}.mdtp__digit.rotate-342{transform:rotate(342deg)}.mdtp__digit.rotate-342 span{transform:rotate(-342deg)}.mdtp__digit.rotate-348{transform:rotate(348deg)}.mdtp__digit.rotate-348 span{transform:rotate(-348deg)}.mdtp__digit.rotate-354{transform:rotate(354deg)}.mdtp__digit.rotate-354 span{transform:rotate(-354deg)}.mdtp__digit.rotate-360{transform:rotate(360deg)}.mdtp__digit.rotate-360 span{transform:rotate(-360deg)}.mdtp__buttons{padding:0 10px 10px;text-align:right}.mdtp__buttons:after{content:'';display:block;clear:both}.mdtp__button{display:inline-block;padding:0 16px;min-width:40px;text-align:center;text-transform:uppercase;line-height:32px;font-weight:500;cursor:pointer;color:#1565c0;border-radius:4px;transition:background-color .2s linear}.mdtp__button:hover{background-color:rgba(0,0,0,.1)}.mdtp__button:active{background-color:rgba(0,0,0,.2)}.mdtp__button.clear-btn{float:left;color:#ef5350!important}.mdtp__wrapper[data-theme='blue'] .mdtp__time_holder{background-color:#1565c0}.mdtp__wrapper[data-theme='blue'] .mdtp__clock .mdtp__am.active,.mdtp__wrapper[data-theme='blue'] .mdtp__clock .mdtp__pm.active{background-color:#1565c0}.mdtp__wrapper[data-theme='blue'] .mdtp__clock .mdtp__clock_dot{background-color:#1565c0}.mdtp__wrapper[data-theme='blue'] .mdtp__digit.active span,.mdtp__wrapper[data-theme='blue'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover{background-color:#1565c0!important}.mdtp__wrapper[data-theme='blue'] .mdtp__digit.active:before{background-color:#1565c0}.mdtp__wrapper[data-theme='blue'] .mdtp__button{color:#1565c0}.mdtp__wrapper[data-theme='red'] .mdtp__time_holder{background-color:#c62828}.mdtp__wrapper[data-theme='red'] .mdtp__clock .mdtp__am.active,.mdtp__wrapper[data-theme='red'] .mdtp__clock .mdtp__pm.active{background-color:#c62828}.mdtp__wrapper[data-theme='red'] .mdtp__clock .mdtp__clock_dot{background-color:#c62828}.mdtp__wrapper[data-theme='red'] .mdtp__digit.active span,.mdtp__wrapper[data-theme='red'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover{background-color:#c62828!important}.mdtp__wrapper[data-theme='red'] .mdtp__digit.active:before{background-color:#c62828}.mdtp__wrapper[data-theme='red'] .mdtp__button{color:#c62828}.mdtp__wrapper[data-theme='purple'] .mdtp__time_holder{background-color:#6a1b9a}.mdtp__wrapper[data-theme='purple'] .mdtp__clock .mdtp__am.active,.mdtp__wrapper[data-theme='purple'] .mdtp__clock .mdtp__pm.active{background-color:#6a1b9a}.mdtp__wrapper[data-theme='purple'] .mdtp__clock .mdtp__clock_dot{background-color:#6a1b9a}.mdtp__wrapper[data-theme='purple'] .mdtp__digit.active span,.mdtp__wrapper[data-theme='purple'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover{background-color:#6a1b9a!important}.mdtp__wrapper[data-theme='purple'] .mdtp__digit.active:before{background-color:#6a1b9a}.mdtp__wrapper[data-theme='purple'] .mdtp__button{color:#6a1b9a}.mdtp__wrapper[data-theme='indigo'] .mdtp__time_holder{background-color:#283593}.mdtp__wrapper[data-theme='indigo'] .mdtp__clock .mdtp__am.active,.mdtp__wrapper[data-theme='indigo'] .mdtp__clock .mdtp__pm.active{background-color:#283593}.mdtp__wrapper[data-theme='indigo'] .mdtp__clock .mdtp__clock_dot{background-color:#283593}.mdtp__wrapper[data-theme='indigo'] .mdtp__digit.active span,.mdtp__wrapper[data-theme='indigo'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover{background-color:#283593!important}.mdtp__wrapper[data-theme='indigo'] .mdtp__digit.active:before{background-color:#283593}.mdtp__wrapper[data-theme='indigo'] .mdtp__button{color:#283593}.mdtp__wrapper[data-theme='teal'] .mdtp__time_holder{background-color:#00695c}.mdtp__wrapper[data-theme='teal'] .mdtp__clock .mdtp__am.active,.mdtp__wrapper[data-theme='teal'] .mdtp__clock .mdtp__pm.active{background-color:#00695c}.mdtp__wrapper[data-theme='teal'] .mdtp__clock .mdtp__clock_dot{background-color:#00695c}.mdtp__wrapper[data-theme='teal'] .mdtp__digit.active span,.mdtp__wrapper[data-theme='teal'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover{background-color:#00695c!important}.mdtp__wrapper[data-theme='teal'] .mdtp__digit.active:before{background-color:#00695c}.mdtp__wrapper[data-theme='teal'] .mdtp__button{color:#00695c}.mdtp__wrapper[data-theme='green'] .mdtp__time_holder{background-color:#2e7d32}.mdtp__wrapper[data-theme='green'] .mdtp__clock .mdtp__am.active,.mdtp__wrapper[data-theme='green'] .mdtp__clock .mdtp__pm.active{background-color:#2e7d32}.mdtp__wrapper[data-theme='green'] .mdtp__clock .mdtp__clock_dot{background-color:#2e7d32}.mdtp__wrapper[data-theme='green'] .mdtp__digit.active span,.mdtp__wrapper[data-theme='green'] .mdtp__clock .mdtp__digit:not(.digit--disabled) span:hover{background-color:#2e7d32!important}.mdtp__wrapper[data-theme='green'] .mdtp__digit.active:before{background-color:#2e7d32}.mdtp__wrapper[data-theme='green'] .mdtp__button{color:#2e7d32}.mdtp__wrapper[data-theme='dark'] .mdtp__time_holder{background-color:#121212}.mdtp__wrapper[data-theme='dark'] .mdtp__clock_holder{background-color:rgb(29,29,29)}.mdtp__wrapper[data-theme='dark'] .mdtp__clock_holder .mdtp__clock{background-color:rgb(24,24,24)}.mdtp__wrapper[data-theme='dark'] .mdtp__clock .mdtp__digit:not(.digit--disabled){color:rgba(255,255,255,.87)}.mdtp__wrapper[data-theme='dark'] .mdtp__clock .mdtp__digit.digit--disabled span{color:rgba(100,100,100,.87)}.mdtp__wrapper[data-theme='dark'] .mdtp__clock .mdtp__am:not(.active),.mdtp__wrapper[data-theme='dark'] .mdtp__clock .mdtp__pm:not(.active){color:rgba(255,255,255,.87);background-color:rgba(200,200,200,.05)}.mdtp__wrapper[data-theme='dark'] .mdtp__button{color:#42a5f5}.mdtp__wrapper[data-theme='dark'] .mdtp__button:hover{background-color:rgba(255,255,255,.04)}.mdtp__wrapper[data-theme='dark'] .mdtp__button:active{background-color:rgba(255,255,255,.1)}@media (max-height:360px){.mdtp__wrapper{flex-direction:row;bottom:8px}.mdtp__time_holder{width:160px;padding:20px}.mdtp__clock .mdtp__am,.mdtp__clock .mdtp__pm{bottom:-4px}.mdtp__clock .mdtp__am{left:-4px}.mdtp__clock .mdtp__pm{right:-4px}}@media (max-height:320px){.mdtp__wrapper{bottom:0}}
+
+    </style>
+
+    <script>
+        (function (factory) {
+	if (typeof define === 'function' && define.amd) {
+		define(['jquery'], factory);
+	} else if (typeof exports === 'object') {
+		module.exports = factory(require('jquery'));;
+	} else {
+		factory(jQuery);
+	}
+})(function ($) {
+	if (typeof $ === 'undefined') { throw new Error('MDTimePicker: This plugin requires jQuery'); }
+
+	var MDTP_DATA = "mdtimepicker", HOUR_START_DEG = 120, MIN_START_DEG = 90, END_DEG = 360, HOUR_DEG_INCR = 30, MIN_DEG_INCR = 6,
+		EX_KEYS = [9, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123];
+
+	/**
+	 * Time object
+	 * @param {number} hour Hour value (0 - 23)
+	 * @param {number} minute Minute value (0 - 59)
+	 */
+	var Time = function (hour, minute) {
+		this.hour = hour;
+		this.minute = minute;
+
+		this.format = function (format, hourPadding) {
+			var that = this, is24Hour = (format.match(/h/g) || []).length > 1;
+
+			return $.trim(format.replace(/(hh|h|mm|ss|tt|t)/g, function (e) {
+				switch (e.toLowerCase()) {
+					case 'h':
+						var hour = that.getHour(true);
+
+						return (hourPadding && hour < 10 ? '0' + hour : hour);
+					case 'hh': return (that.hour < 10 ? '0' + that.hour : that.hour);
+					case 'mm': return (that.minute < 10 ? '0' + that.minute : that.minute);
+					case 'ss': return '00';
+					case 't': return is24Hour ? '' : that.getPeriod().toLowerCase();
+					case 'tt': return is24Hour ? '' : that.getPeriod();
+				}
+			}));
+		};
+
+		this.setHour = function (value) { this.hour = value; };
+		this.getHour = function (is12Hour) { return is12Hour ? [0, 12].indexOf(this.hour) >= 0 ? 12 : (this.hour % 12) : this.hour; };
+		this.invert = function () {
+			if (this.getPeriod() === 'AM') this.setHour(this.getHour() + 12);
+			else this.setHour(this.getHour() - 12);
+		};
+		this.setMinutes = function (value) { this.minute = value; }
+		this.getMinutes = function () { return this.minute; }
+		this.getPeriod = function () { return this.hour < 12 ? 'AM' : 'PM'; };
+	};
+
+	/**
+	 * Time picker object
+	 * @param {HTMLInputElement} el Input element
+	 * @param {Object} config Time picker configurations
+	 */
+	var MDTimePicker = function (el, config) {
+		var _ = this;
+
+		this.visible = false;
+		this.activeView = 'hours';
+		this.hTimeout = null;
+		this.mTimeout = null;
+		this.input = $(el);
+		this.config = config;
+		this.time = new Time(0, 0);
+		this.selected = new Time(0, 0);
+		this.timepicker = {
+			overlay: $('<div class="mdtimepicker hidden"></div>'),
+			wrapper: $('<div class="mdtp__wrapper" tabindex="0"></div>'),
+			timeHolder: {
+				wrapper: $('<section class="mdtp__time_holder"></section>'),
+				hour: $('<span class="mdtp__time_h">12</span>'),
+				dots: $('<span class="mdtp__timedots">:</span>'),
+				minute: $('<span class="mdtp__time_m">00</span>'),
+				am_pm: $('<span class="mdtp__ampm">AM</span>')
+			},
+			clockHolder: {
+				wrapper: $('<section class="mdtp__clock_holder"></section>'),
+				am: $('<span class="mdtp__am">AM</span>'),
+				pm: $('<span class="mdtp__pm">PM</span>'),
+				clock: {
+					wrapper: $('<div class="mdtp__clock"></div>'),
+					dot: $('<span class="mdtp__clock_dot"></span>'),
+					hours: $('<div class="mdtp__hour_holder"></div>'),
+					minutes: $('<div class="mdtp__minute_holder"></div>')
+				},
+				buttonsHolder: {
+					wrapper: $('<div class="mdtp__buttons">'),
+					btnClear: $('<span class="mdtp__button clear-btn">Clear</span>'),
+					btnOk: $('<span class="mdtp__button ok">Ok</span>'),
+					btnCancel: $('<span class="mdtp__button cancel">Cancel</span>')
+				}
+			}
+		};
+
+		this.setMinTime(this.input.data('mintime') || this.config.minTime);
+		this.setMaxTime(this.input.data('maxtime') || this.config.maxTime);
+
+		var picker = _.timepicker;
+
+		_.setup().appendTo('body');
+
+		picker.overlay.click(function () { _.hide(); });
+		picker.wrapper.click(function (e) { e.stopPropagation() })
+			.on('keydown', function (e) {
+				if (e.keyCode !== 27) return;
+
+				_.hide();
+			});
+		picker.clockHolder.am.click(function () { if (_.selected.getPeriod() !== 'AM') _.setPeriod('am'); });
+		picker.clockHolder.pm.click(function () { if (_.selected.getPeriod() !== 'PM') _.setPeriod('pm'); });
+		picker.timeHolder.hour.click(function () { if (_.activeView !== 'hours') _.switchView('hours'); });
+		picker.timeHolder.minute.click(function () { if (_.activeView !== 'minutes') _.switchView('minutes'); });
+		picker.clockHolder.buttonsHolder.btnOk.click(function () {
+			var selected = _.selected;
+
+			if (_.isDisabled(selected.getHour(), selected.getMinutes(), false)) return;
+
+			_.setValue(selected);
+
+			var formatted = _.getFormattedTime();
+
+			_.triggerChange({ time: formatted.time, value: formatted.value });
+			_.hide();
+		});
+		picker.clockHolder.buttonsHolder.btnCancel.click(function () { _.hide(); });
+
+		if (_.config.clearBtn) {
+			picker.clockHolder.buttonsHolder.btnClear.click(function () {
+				_.input.val('')
+					.attr('data-time', null)
+					.attr('value', '');
+
+				_.triggerChange({ time: null, value: '' });
+				_.hide();
+			});
+		}
+
+		_.input.on('keydown', function (e) {
+			if (e.keyCode === 13) _.show();
+			return !(EX_KEYS.indexOf(e.which) < 0 && _.config.readOnly);
+		}).on('click', function () { _.show(); })
+			.prop('readonly', true);
+
+		if (_.input.val() !== '') {
+			var time = _.parseTime(_.input.val(), _.config.format);
+
+			_.setValue(time);
+		} else {
+			var time = _.getSystemTime();
+
+			_.time = new Time(time.hour, time.minute);
+		}
+
+		_.resetSelected();
+		_.switchView(_.activeView);
+	};
+
+	MDTimePicker.prototype = {
+		constructor: MDTimePicker,
+
+		/**
+		 * Setup time picker html elements
+		 */
+		setup: function () {
+			var _ = this, picker = _.timepicker, overlay = picker.overlay, wrapper = picker.wrapper,
+				time = picker.timeHolder, clock = picker.clockHolder;
+
+			// Setup time holder
+			time.wrapper.append(time.hour)
+				.append(time.dots)
+				.append(time.minute)
+				.appendTo(wrapper);
+
+			if (!_.config.is24hour) time.wrapper.append(time.am_pm);
+
+			// Setup hours
+			var _hours = _.config.is24hour ? 24 : 12;
+			for (var i = 0; i < _hours; i++) {
+				var value = i + 1, deg = ((HOUR_START_DEG + (i * HOUR_DEG_INCR)) % END_DEG) - (_.config.is24hour && value < 13 ? 15 : 0),
+					is24 = value === 24,
+					hour = $('<div class="mdtp__digit rotate-' + deg + '" data-hour="' + (is24 ? 0 : value) + '"><span>' + (is24 ? '00' : value) + '</span></div>');
+
+				if (_.config.is24hour && value < 13) hour.addClass('inner--digit');
+
+				hour.find('span').click(function () {
+					var _hour = parseInt($(this).parent().data('hour')),
+						_selectedT = _.selected.getPeriod(),
+						_value = _.config.is24hour ? _hour :
+							(_hour + ((_selectedT === 'PM' && _hour < 12) || (_selectedT === 'AM' && _hour === 12) ? 12 : 0)) % 24,
+						disabled = _.isDisabled(_value, 0, true);
+
+					if (disabled) return;
+
+					_.setHour(_value);
+					_.switchView('minutes');
+				});
+
+				clock.clock.hours.append(hour);
+			}
+
+			// Setup minutes
+			for (var i = 0; i < 60; i++) {
+				var min = i < 10 ? '0' + i : i, deg = (MIN_START_DEG + (i * MIN_DEG_INCR)) % END_DEG,
+					minute = $('<div class="mdtp__digit rotate-' + deg + '" data-minute="' + i + '"></div>');
+
+				if (i % 5 === 0) minute.addClass('marker').html('<span>' + min + '</span>');
+				else minute.html('<span></span>');
+
+				minute.find('span').click(function () {
+					var _minute = parseInt($(this).parent().data('minute')),
+						_hour = _.selected.getHour(),
+						disabled = _.isDisabled(_hour, _minute, true);
+
+					if (disabled) return;
+
+					_.setMinute(_minute);
+				});
+
+				clock.clock.minutes.append(minute);
+			}
+
+			// Setup clock
+			if (!_.config.is24hour) clock.clock.wrapper.append(clock.am).append(clock.pm)
+			clock.clock.wrapper
+				.append(clock.clock.dot)
+				.append(clock.clock.hours)
+				.append(clock.clock.minutes)
+				.appendTo(clock.wrapper);
+
+			// Setup buttons
+			if (_.config.clearBtn) {
+				clock.buttonsHolder.wrapper.append(clock.buttonsHolder.btnClear);
+			}
+
+			clock.buttonsHolder.wrapper.append(clock.buttonsHolder.btnCancel)
+				.append(clock.buttonsHolder.btnOk)
+				.appendTo(clock.wrapper);
+
+			clock.wrapper.appendTo(wrapper);
+
+			// Setup theme
+			wrapper.attr('data-theme', _.input.data('theme') || _.config.theme || $.fn.mdtimepicker.defaults.theme);
+
+			wrapper.appendTo(overlay);
+
+			return overlay;
+		},
+
+		/**
+		 * Sets the hour value of the selected time
+		 * @param {number} hour Hour value
+		 */
+		setHour: function (hour) {
+			if (typeof hour === 'undefined') throw new Error('Expecting a value.');
+
+			var that = this, is12Hour = !that.config.is24hour
+
+			this.selected.setHour(hour);
+
+			var _selectedH = this.selected.getHour(is12Hour);
+			this.timepicker.timeHolder.hour.text(is12Hour ? _selectedH : this.selected.format('hh'));
+
+			this.timepicker.clockHolder.clock.hours.children('div').each(function (idx, div) {
+				var el = $(div), val = el.data('hour');
+
+				el[val === _selectedH ? 'addClass' : 'removeClass']('active');
+			});
+		},
+
+		/**
+		 * Sets the minute value of the selected time
+		 * @param {number} minute Minute value
+		 */
+		setMinute: function (minute) {
+			if (typeof minute === 'undefined') throw new Error('Expecting a value.');
+
+			this.selected.setMinutes(minute);
+			this.timepicker.timeHolder.minute.text(minute < 10 ? '0' + minute : minute);
+
+			this.timepicker.clockHolder.clock.minutes.children('div').each(function (idx, div) {
+				var el = $(div), val = el.data('minute');
+
+				el[val === minute ? 'addClass' : 'removeClass']('active');
+			});
+		},
+
+		/**
+		 * Sets the time period of the selected time
+		 * @param {string} period Period value (AM/PM)
+		 */
+		setPeriod: function (period) {
+			if (typeof period === 'undefined') throw new Error('Expecting a value.');
+
+			if (this.selected.getPeriod() !== period.toUpperCase()) this.selected.invert();
+
+			var _period = this.selected.getPeriod();
+
+			this.setDisabled(this.activeView);
+
+			this.timepicker.timeHolder.am_pm.text(_period);
+			this.timepicker.clockHolder.am[_period === 'AM' ? 'addClass' : 'removeClass']('active');
+			this.timepicker.clockHolder.pm[_period === 'PM' ? 'addClass' : 'removeClass']('active');
+		},
+
+		/**
+		 * Sets the value of the selected time
+		 * @param {string} value Time string values
+		 */
+		setValue: function (value) {
+			if (typeof value === 'undefined') throw new Error('Expecting a value.');
+
+			var time = typeof value === 'string' ? this.parseTime(value, this.config.format) : value;
+
+			this.time = new Time(time.hour, time.minute);
+
+			var formatted = this.getFormattedTime();
+
+			this.input.val(formatted.value)
+				.attr('data-time', formatted.time)
+				.attr('value', formatted.value);
+		},
+
+		/**
+		 * Sets the minimum time constraint
+		 * @param {string} time Minimum time value
+		 */
+		setMinTime: function (time) { this.minTime = time },
+
+		/**
+		 * Sets the maximum time constraint
+		 * @param {string} time Maximum time value
+		 */
+		setMaxTime: function (time) { this.maxTime = time },
+
+		/**
+		 * Sets the disabled digits of the clock
+		 * @param {string} view View name
+		 */
+		setDisabled: function (view) {
+			if (view !== 'hours' && view !== 'minutes') return;
+
+			var _ = this, clock = this.timepicker.clockHolder.clock;
+
+			if (view === 'hours') {
+				clock.hours.find('.mdtp__digit').each(function (i, hEl) {
+					var hour = $(hEl), value = parseInt(hour.data('hour')),
+						period = _.selected.getPeriod(),
+						time = new Time(value, 0);
+
+					if (!_.config.is24hour && period !== time.getPeriod()) time.invert();
+
+					var disabled = _.isDisabled(time.getHour(), 0, true);
+
+					hour[disabled ? 'addClass' : 'removeClass']('digit--disabled');
+				});
+			}
+
+			if (view === 'minutes') {
+				clock.minutes.find('.mdtp__digit').each(function (i, mEl) {
+					var minute = $(mEl), value = parseInt(minute.data('minute')),
+						hour = _.selected.getHour(),
+						disabled = _.isDisabled(hour, value, true);
+
+					minute[disabled ? 'addClass' : 'removeClass']('digit--disabled');
+				});
+			}
+		},
+
+		/**
+		 * Determines if the given time is disabled
+		 * @param {number} hour Hour value
+		 * @param {number} minute Minute value
+		 * @param {boolean} renderMode `true` if called upon rendering; `false` otherwise
+		 */
+		isDisabled: function (hour, minute, renderMode) {
+			var _ = this, minT = null, min = null, maxT = null, max = null, now = new Date(),
+				time = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, 0, 0),
+				hourView = _.activeView === 'hours';
+
+			if (_.minTime) minT = _.minTime === 'now' ? _.getSystemTime() : _.parseTime(_.minTime);
+			if (_.maxTime) maxT = _.maxTime === 'now' ? _.getSystemTime() : _.parseTime(_.maxTime);
+
+			if (minT) {
+				min = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+					minT.getHour(), hourView && renderMode ? 0 : minT.getMinutes(), 0, 0)
+			}
+
+			if (maxT) {
+				max = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
+					maxT.getHour(), hourView && renderMode ? 0 : maxT.getMinutes(), 0, 0)
+			}
+
+			return (min && time < min) || (max && time > max);
+		},
+
+		/**
+		 * Resets the selected time to client (system) time
+		 */
+		resetSelected: function () {
+			this.setHour(this.time.hour);
+			this.setMinute(this.time.minute);
+			this.setPeriod(this.time.getPeriod());
+		},
+
+		/**
+		 * Returns the selected time string
+		 */
+		getFormattedTime: function () {
+			var time = this.time.format(this.config.timeFormat, false),
+				tValue = this.time.format(this.config.format, this.config.hourPadding);
+
+			return { time: time, value: tValue };
+		},
+
+		/**
+		 * Returns the current client (system) time
+		 */
+		getSystemTime: function () {
+			var now = new Date();
+
+			return new Time(now.getHours(), now.getMinutes());
+		},
+
+		/**
+		 * Parses the given time string into a Time object
+		 * @param {string} time Time value
+		 * @param {string} tf Time format
+		 */
+		parseTime: function (time, tf) {
+			var that = this, format = typeof tf === 'undefined' ? that.config.format : tf,
+				hLength = (format.match(/h/g) || []).length,
+				is24Hour = hLength > 1,
+				mLength = (format.match(/m/g) || []).length, tLength = (format.match(/t/g) || []).length,
+				timeLength = time.length,
+				fH = format.indexOf('h'), lH = format.lastIndexOf('h'),
+				hour = '', min = '', t = '';
+
+			// Parse hour
+			if (that.config.hourPadding || is24Hour) {
+				hour = time.substr(fH, 2);
+			} else {
+				var prev = format.substring(fH - 1, fH), next = format.substring(lH + 1, lH + 2);
+
+				if (lH === format.length - 1) {
+					hour = time.substring(time.indexOf(prev, fH - 1) + 1, timeLength);
+				} else if (fH === 0) {
+					hour = time.substring(0, time.indexOf(next, fH));
+				} else {
+					hour = time.substring(time.indexOf(prev, fH - 1) + 1, time.indexOf(next, fH + 1));
+				}
+			}
+
+			format = format.replace(/(hh|h)/g, hour);
+
+			var fM = format.indexOf('m'), lM = format.lastIndexOf('m'),
+				fT = format.indexOf('t');
+
+			// Parse minute
+			var prevM = format.substring(fM - 1, fM), nextM = format.substring(lM + 1, lM + 2);
+
+			if (lM === format.length - 1) {
+				min = time.substring(time.indexOf(prevM, fM - 1) + 1, timeLength);
+			} else if (fM === 0) {
+				min = time.substring(0, 2);
+			} else {
+				min = time.substr(fM, 2);
+			}
+
+			// Parse t (am/pm)
+			if (is24Hour) t = parseInt(hour) > 11 ? (tLength > 1 ? 'PM' : 'pm') : (tLength > 1 ? 'AM' : 'am');
+			else t = time.substr(fT, 2);
+
+			var isPm = t.toLowerCase() === 'pm',
+				outTime = new Time(parseInt(hour), parseInt(min));
+			if ((isPm && parseInt(hour) < 12) || (!isPm && parseInt(hour) === 12)) {
+				outTime.invert();
+			}
+
+			return outTime;
+		},
+
+		/**
+		 * Switches the time picker view (screen)
+		 * @param {string} view View name
+		 */
+		switchView: function (view) {
+			var _ = this, picker = this.timepicker, anim_speed = 350;
+
+			if (view !== 'hours' && view !== 'minutes') return;
+
+			_.activeView = view;
+			_.setDisabled(view);
+
+			picker.timeHolder.hour[view === 'hours' ? 'addClass' : 'removeClass']('active');
+			picker.timeHolder.minute[view === 'hours' ? 'removeClass' : 'addClass']('active');
+
+			picker.clockHolder.clock.hours.addClass('animate');
+			if (view === 'hours') picker.clockHolder.clock.hours.removeClass('hidden');
+
+			clearTimeout(_.hTimeout);
+
+			_.hTimeout = setTimeout(function () {
+				if (view !== 'hours') picker.clockHolder.clock.hours.addClass('hidden');
+				picker.clockHolder.clock.hours.removeClass('animate');
+			}, view === 'hours' ? 20 : anim_speed);
+
+			picker.clockHolder.clock.minutes.addClass('animate');
+			if (view === 'minutes') picker.clockHolder.clock.minutes.removeClass('hidden');
+
+			clearTimeout(_.mTimeout);
+
+			_.mTimeout = setTimeout(function () {
+				if (view !== 'minutes') picker.clockHolder.clock.minutes.addClass('hidden');
+				picker.clockHolder.clock.minutes.removeClass('animate');
+			}, view === 'minutes' ? 20 : anim_speed);
+		},
+
+		/**
+		 * Shows the time picker
+		 */
+		show: function () {
+			var that = this;
+
+			if (that.input.val() === '') {
+				var time = that.getSystemTime();
+				this.time = new Time(time.hour, time.minute);
+			}
+
+			that.resetSelected();
+
+			$('body').attr('mdtimepicker-display', 'on');
+
+			that.timepicker.wrapper.addClass('animate');
+			that.timepicker.overlay.removeClass('hidden').addClass('animate');
+			setTimeout(function () {
+				that.timepicker.overlay.removeClass('animate');
+				that.timepicker.wrapper.removeClass('animate')
+					.focus();
+
+				that.visible = true;
+				that.input.blur();
+			}, 10);
+		},
+
+		/**
+		 * Hides the time picker
+		 */
+		hide: function () {
+			var that = this;
+
+			that.timepicker.overlay.addClass('animate');
+			that.timepicker.wrapper.addClass('animate');
+			setTimeout(function () {
+				that.switchView('hours');
+				that.timepicker.overlay.addClass('hidden').removeClass('animate');
+				that.timepicker.wrapper.removeClass('animate');
+
+				$('body').removeAttr('mdtimepicker-display');
+
+				that.visible = false;
+				that.input.focus();
+			}, 300);
+		},
+
+		/**
+		 * Removes the time picker
+		 */
+		destroy: function () {
+			var that = this;
+
+			that.input.removeData(MDTP_DATA)
+				.unbind('keydown').unbind('click')
+				.removeProp('readonly');
+			that.timepicker.overlay.remove();
+		},
+
+		/**
+		 * Triggers the change event on the input element
+		 * @param {Object} data Event data
+		 */
+		triggerChange: function (data) {
+			this.input.trigger($.Event('timechanged', data))
+				.trigger('onchange')	// for ASP.Net postback
+				.trigger('change');
+		}
+	};
+
+	$.fn.mdtimepicker = function () {
+		var mdtp_args = arguments,
+			arg0 = mdtp_args[0],
+			_defaults = $.extend({}, $.fn.mdtimepicker.defaults);
+
+		if (typeof arg0 === 'object' && arg0.is24hour) _defaults.format = 'hh:mm';
+
+		return $(this).each(function (idx, el) {
+			var that = this,
+				$that = $(this),
+				picker = $(this).data(MDTP_DATA),
+				options = $.extend({}, _defaults, $that.data(), typeof arg0 === 'object' && arg0);
+
+			if (!picker) {
+				$that.data(MDTP_DATA, (picker = new MDTimePicker(that, options)));
+			}
+
+			if (typeof arg0 === 'string')
+				picker[arg0].apply(picker, Array.prototype.slice.call(mdtp_args).slice(1));
+		});
+	}
+
+	$.fn.mdtimepicker.defaults = {
+		timeFormat: 'hh:mm:ss.000',	// format of the time value (data-time attribute)
+		format: 'h:mm tt',			// format of the input value
+		theme: 'blue',				// theme of the timepicker
+		hourPadding: false,			// determines if display value has zero padding for hour value less than 10 (i.e. 05:30 PM); 24-hour format has padding by default
+		clearBtn: false,            // determines if clear button is visible
+		is24hour: false             // determines if the clock will use 24-hour format in the UI; format config will be forced to `hh:mm` if not specified
+	};
+});
+!function(e){"function"==typeof define&&define.amd?define(["jquery"],e):"object"==typeof exports?module.exports=e(require("jquery")):e(jQuery)}(function(e){if("undefined"==typeof e)throw new Error("MDTimePicker: This plugin requires jQuery");var t="mdtimepicker",i=120,s=90,n=360,r=30,a=6,o=[9,112,113,114,115,116,117,118,119,120,121,122,123],c=function(t,i){this.hour=t,this.minute=i,this.format=function(t,i){var s=this,n=(t.match(/h/g)||[]).length>1;return e.trim(t.replace(/(hh|h|mm|ss|tt|t)/g,function(e){switch(e.toLowerCase()){case"h":var t=s.getHour(!0);return i&&10>t?"0"+t:t;case"hh":return s.hour<10?"0"+s.hour:s.hour;case"mm":return s.minute<10?"0"+s.minute:s.minute;case"ss":return"00";case"t":return n?"":s.getPeriod().toLowerCase();case"tt":return n?"":s.getPeriod()}}))},this.setHour=function(e){this.hour=e},this.getHour=function(e){return e?[0,12].indexOf(this.hour)>=0?12:this.hour%12:this.hour},this.invert=function(){"AM"===this.getPeriod()?this.setHour(this.getHour()+12):this.setHour(this.getHour()-12)},this.setMinutes=function(e){this.minute=e},this.getMinutes=function(){return this.minute},this.getPeriod=function(){return this.hour<12?"AM":"PM"}},d=function(t,i){var s=this;this.visible=!1,this.activeView="hours",this.hTimeout=null,this.mTimeout=null,this.input=e(t),this.config=i,this.time=new c(0,0),this.selected=new c(0,0),this.timepicker={overlay:e('<div class="mdtimepicker hidden"></div>'),wrapper:e('<div class="mdtp__wrapper" tabindex="0"></div>'),timeHolder:{wrapper:e('<section class="mdtp__time_holder"></section>'),hour:e('<span class="mdtp__time_h">12</span>'),dots:e('<span class="mdtp__timedots">:</span>'),minute:e('<span class="mdtp__time_m">00</span>'),am_pm:e('<span class="mdtp__ampm">AM</span>')},clockHolder:{wrapper:e('<section class="mdtp__clock_holder"></section>'),am:e('<span class="mdtp__am">AM</span>'),pm:e('<span class="mdtp__pm">PM</span>'),clock:{wrapper:e('<div class="mdtp__clock"></div>'),dot:e('<span class="mdtp__clock_dot"></span>'),hours:e('<div class="mdtp__hour_holder"></div>'),minutes:e('<div class="mdtp__minute_holder"></div>')},buttonsHolder:{wrapper:e('<div class="mdtp__buttons">'),btnClear:e('<span class="mdtp__button clear-btn">Clear</span>'),btnOk:e('<span class="mdtp__button ok">Ok</span>'),btnCancel:e('<span class="mdtp__button cancel">Cancel</span>')}}},this.setMinTime(this.input.data("mintime")||this.config.minTime),this.setMaxTime(this.input.data("maxtime")||this.config.maxTime);var n=s.timepicker;if(s.setup().appendTo("body"),n.overlay.click(function(){s.hide()}),n.wrapper.click(function(e){e.stopPropagation()}).on("keydown",function(e){27===e.keyCode&&s.hide()}),n.clockHolder.am.click(function(){"AM"!==s.selected.getPeriod()&&s.setPeriod("am")}),n.clockHolder.pm.click(function(){"PM"!==s.selected.getPeriod()&&s.setPeriod("pm")}),n.timeHolder.hour.click(function(){"hours"!==s.activeView&&s.switchView("hours")}),n.timeHolder.minute.click(function(){"minutes"!==s.activeView&&s.switchView("minutes")}),n.clockHolder.buttonsHolder.btnOk.click(function(){var e=s.selected;if(!s.isDisabled(e.getHour(),e.getMinutes(),!1)){s.setValue(e);var t=s.getFormattedTime();s.triggerChange({time:t.time,value:t.value}),s.hide()}}),n.clockHolder.buttonsHolder.btnCancel.click(function(){s.hide()}),s.config.clearBtn&&n.clockHolder.buttonsHolder.btnClear.click(function(){s.input.val("").attr("data-time",null).attr("value",""),s.triggerChange({time:null,value:""}),s.hide()}),s.input.on("keydown",function(e){return 13===e.keyCode&&s.show(),!(o.indexOf(e.which)<0&&s.config.readOnly)}).on("click",function(){s.show()}).prop("readonly",!0),""!==s.input.val()){var r=s.parseTime(s.input.val(),s.config.format);s.setValue(r)}else{var r=s.getSystemTime();s.time=new c(r.hour,r.minute)}s.resetSelected(),s.switchView(s.activeView)};d.prototype={constructor:d,setup:function(){var t=this,o=t.timepicker,c=o.overlay,d=o.wrapper,u=o.timeHolder,m=o.clockHolder;u.wrapper.append(u.hour).append(u.dots).append(u.minute).appendTo(d),t.config.is24hour||u.wrapper.append(u.am_pm);for(var l=t.config.is24hour?24:12,h=0;l>h;h++){var p=h+1,f=(i+h*r)%n-(t.config.is24hour&&13>p?15:0),g=24===p,v=e('<div class="mdtp__digit rotate-'+f+'" data-hour="'+(g?0:p)+'"><span>'+(g?"00":p)+"</span></div>");t.config.is24hour&&13>p&&v.addClass("inner--digit"),v.find("span").click(function(){var i=parseInt(e(this).parent().data("hour")),s=t.selected.getPeriod(),n=t.config.is24hour?i:(i+("PM"===s&&12>i||"AM"===s&&12===i?12:0))%24,r=t.isDisabled(n,0,!0);r||(t.setHour(n),t.switchView("minutes"))}),m.clock.hours.append(v)}for(var h=0;60>h;h++){var k=10>h?"0"+h:h,f=(s+h*a)%n,w=e('<div class="mdtp__digit rotate-'+f+'" data-minute="'+h+'"></div>');h%5===0?w.addClass("marker").html("<span>"+k+"</span>"):w.html("<span></span>"),w.find("span").click(function(){var i=parseInt(e(this).parent().data("minute")),s=t.selected.getHour(),n=t.isDisabled(s,i,!0);n||t.setMinute(i)}),m.clock.minutes.append(w)}return t.config.is24hour||m.clock.wrapper.append(m.am).append(m.pm),m.clock.wrapper.append(m.clock.dot).append(m.clock.hours).append(m.clock.minutes).appendTo(m.wrapper),t.config.clearBtn&&m.buttonsHolder.wrapper.append(m.buttonsHolder.btnClear),m.buttonsHolder.wrapper.append(m.buttonsHolder.btnCancel).append(m.buttonsHolder.btnOk).appendTo(m.wrapper),m.wrapper.appendTo(d),d.attr("data-theme",t.input.data("theme")||t.config.theme||e.fn.mdtimepicker.defaults.theme),d.appendTo(c),c},setHour:function(t){if("undefined"==typeof t)throw new Error("Expecting a value.");var i=this,s=!i.config.is24hour;this.selected.setHour(t);var n=this.selected.getHour(s);this.timepicker.timeHolder.hour.text(s?n:this.selected.format("hh")),this.timepicker.clockHolder.clock.hours.children("div").each(function(t,i){var s=e(i),r=s.data("hour");s[r===n?"addClass":"removeClass"]("active")})},setMinute:function(t){if("undefined"==typeof t)throw new Error("Expecting a value.");this.selected.setMinutes(t),this.timepicker.timeHolder.minute.text(10>t?"0"+t:t),this.timepicker.clockHolder.clock.minutes.children("div").each(function(i,s){var n=e(s),r=n.data("minute");n[r===t?"addClass":"removeClass"]("active")})},setPeriod:function(e){if("undefined"==typeof e)throw new Error("Expecting a value.");this.selected.getPeriod()!==e.toUpperCase()&&this.selected.invert();var t=this.selected.getPeriod();this.setDisabled(this.activeView),this.timepicker.timeHolder.am_pm.text(t),this.timepicker.clockHolder.am["AM"===t?"addClass":"removeClass"]("active"),this.timepicker.clockHolder.pm["PM"===t?"addClass":"removeClass"]("active")},setValue:function(e){if("undefined"==typeof e)throw new Error("Expecting a value.");var t="string"==typeof e?this.parseTime(e,this.config.format):e;this.time=new c(t.hour,t.minute);var i=this.getFormattedTime();this.input.val(i.value).attr("data-time",i.time).attr("value",i.value)},setMinTime:function(e){this.minTime=e},setMaxTime:function(e){this.maxTime=e},setDisabled:function(t){if("hours"===t||"minutes"===t){var i=this,s=this.timepicker.clockHolder.clock;"hours"===t&&s.hours.find(".mdtp__digit").each(function(t,s){var n=e(s),r=parseInt(n.data("hour")),a=i.selected.getPeriod(),o=new c(r,0);i.config.is24hour||a===o.getPeriod()||o.invert();var d=i.isDisabled(o.getHour(),0,!0);n[d?"addClass":"removeClass"]("digit--disabled")}),"minutes"===t&&s.minutes.find(".mdtp__digit").each(function(t,s){var n=e(s),r=parseInt(n.data("minute")),a=i.selected.getHour(),o=i.isDisabled(a,r,!0);n[o?"addClass":"removeClass"]("digit--disabled")})}},isDisabled:function(e,t,i){var s=this,n=null,r=null,a=null,o=null,c=new Date,d=new Date(c.getFullYear(),c.getMonth(),c.getDate(),e,t,0,0),u="hours"===s.activeView;return s.minTime&&(n="now"===s.minTime?s.getSystemTime():s.parseTime(s.minTime)),s.maxTime&&(a="now"===s.maxTime?s.getSystemTime():s.parseTime(s.maxTime)),n&&(r=new Date(c.getFullYear(),c.getMonth(),c.getDate(),n.getHour(),u&&i?0:n.getMinutes(),0,0)),a&&(o=new Date(c.getFullYear(),c.getMonth(),c.getDate(),a.getHour(),u&&i?0:a.getMinutes(),0,0)),r&&r>d||o&&d>o},resetSelected:function(){this.setHour(this.time.hour),this.setMinute(this.time.minute),this.setPeriod(this.time.getPeriod())},getFormattedTime:function(){var e=this.time.format(this.config.timeFormat,!1),t=this.time.format(this.config.format,this.config.hourPadding);return{time:e,value:t}},getSystemTime:function(){var e=new Date;return new c(e.getHours(),e.getMinutes())},parseTime:function(e,t){var i=this,s="undefined"==typeof t?i.config.format:t,n=(s.match(/h/g)||[]).length,r=n>1,a=((s.match(/m/g)||[]).length,(s.match(/t/g)||[]).length),o=e.length,d=s.indexOf("h"),u=s.lastIndexOf("h"),m="",l="",h="";if(i.config.hourPadding||r)m=e.substr(d,2);else{var p=s.substring(d-1,d),f=s.substring(u+1,u+2);m=u===s.length-1?e.substring(e.indexOf(p,d-1)+1,o):0===d?e.substring(0,e.indexOf(f,d)):e.substring(e.indexOf(p,d-1)+1,e.indexOf(f,d+1))}s=s.replace(/(hh|h)/g,m);var g=s.indexOf("m"),v=s.lastIndexOf("m"),k=s.indexOf("t"),w=s.substring(g-1,g);s.substring(v+1,v+2);l=v===s.length-1?e.substring(e.indexOf(w,g-1)+1,o):0===g?e.substring(0,2):e.substr(g,2),h=r?parseInt(m)>11?a>1?"PM":"pm":a>1?"AM":"am":e.substr(k,2);var b="pm"===h.toLowerCase(),H=new c(parseInt(m),parseInt(l));return(b&&parseInt(m)<12||!b&&12===parseInt(m))&&H.invert(),H},switchView:function(e){var t=this,i=this.timepicker,s=350;"hours"!==e&&"minutes"!==e||(t.activeView=e,t.setDisabled(e),i.timeHolder.hour["hours"===e?"addClass":"removeClass"]("active"),i.timeHolder.minute["hours"===e?"removeClass":"addClass"]("active"),i.clockHolder.clock.hours.addClass("animate"),"hours"===e&&i.clockHolder.clock.hours.removeClass("hidden"),clearTimeout(t.hTimeout),t.hTimeout=setTimeout(function(){"hours"!==e&&i.clockHolder.clock.hours.addClass("hidden"),i.clockHolder.clock.hours.removeClass("animate")},"hours"===e?20:s),i.clockHolder.clock.minutes.addClass("animate"),"minutes"===e&&i.clockHolder.clock.minutes.removeClass("hidden"),clearTimeout(t.mTimeout),t.mTimeout=setTimeout(function(){"minutes"!==e&&i.clockHolder.clock.minutes.addClass("hidden"),i.clockHolder.clock.minutes.removeClass("animate")},"minutes"===e?20:s))},show:function(){var t=this;if(""===t.input.val()){var i=t.getSystemTime();this.time=new c(i.hour,i.minute)}t.resetSelected(),e("body").attr("mdtimepicker-display","on"),t.timepicker.wrapper.addClass("animate"),t.timepicker.overlay.removeClass("hidden").addClass("animate"),setTimeout(function(){t.timepicker.overlay.removeClass("animate"),t.timepicker.wrapper.removeClass("animate").focus(),t.visible=!0,t.input.blur()},10)},hide:function(){var t=this;t.timepicker.overlay.addClass("animate"),t.timepicker.wrapper.addClass("animate"),setTimeout(function(){t.switchView("hours"),t.timepicker.overlay.addClass("hidden").removeClass("animate"),t.timepicker.wrapper.removeClass("animate"),e("body").removeAttr("mdtimepicker-display"),t.visible=!1,t.input.focus()},300)},destroy:function(){var e=this;e.input.removeData(t).unbind("keydown").unbind("click").removeProp("readonly"),e.timepicker.overlay.remove()},triggerChange:function(t){this.input.trigger(e.Event("timechanged",t)).trigger("onchange").trigger("change")}},e.fn.mdtimepicker=function(){var i=arguments,s=i[0],n=e.extend({},e.fn.mdtimepicker.defaults);return"object"==typeof s&&s.is24hour&&(n.format="hh:mm"),e(this).each(function(){var r=this,a=e(this),o=e(this).data(t),c=e.extend({},n,a.data(),"object"==typeof s&&s);o||a.data(t,o=new d(r,c)),"string"==typeof s&&o[s].apply(o,Array.prototype.slice.call(i).slice(1))})},e.fn.mdtimepicker.defaults={timeFormat:"hh:mm:ss.000",format:"h:mm tt",theme:"blue",hourPadding:!1,clearBtn:!1,is24hour:!1}});
+const hours = document.querySelector('.hours');
+const minutes = document.querySelector('.minutes');
+const seconds = document.querySelector('.seconds');
+
+clock = () => {
+    let today = new Date();
+    let h = today.getHours() % 12 + today.getMinutes() / 59; // 22 % 12 = 10pm
+    let m = today.getMinutes(); // 0 - 59
+    let s = today.getSeconds(); // 0 - 59
+
+    h *= 30; // 12 * 30 = 360deg
+    m *= 6;
+    s *= 6; // 60 * 6 = 360deg
+
+    rotation(hours, h);
+    rotation(minutes, m);
+    rotation(seconds, s);
+
+    // call every second
+    setTimeout(clock, 500);
+};
+
+rotation = (target, val) => {
+    target.style.transform = `rotate(${val}deg)`;
+};
+
+window.onload = clock();
+
+function toggleDiv() {
+    $('.components').toggle();
+    $('.components2').toggle();
+}
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBiEq8qTavVUyQtasjlw7stvEpBvvAiMgs",
+  authDomain: "iot-brrrr.firebaseapp.com",
+  databaseURL: "https://iot-brrrr-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "iot-brrrr",
+  storageBucket: "iot-brrrr.appspot.com",
+  messagingSenderId: "712474589254",
+  appId: "1:712474589254:web:1fa276dc864c0ea236b247",
+  measurementId: "G-D91JK12Y11"
+};
+firebase.initializeApp(firebaseConfig);
+
+var countRef = firebase.database().ref('count');
+countRef.on('value', function(snapshot) {
+    count = snapshot.val()
+    console.log(count)
+});
+
+function feednow() {
+    firebase.database().ref().update({
+        feednow: 1
+    });
+}
+
+$(document).ready(function() {
+    $('#timepicker').mdtimepicker(); //Initializes the time picker
+    addDiv();
+});
+
+$('#timepicker').mdtimepicker().on('timechanged', function(e) {
+    console.log(e.time)
+    addStore(count, e);
+    count = count + 1
+    firebase.database().ref().update({
+        count: parseInt(count),
+    });
+});
+
+function addStore(count, e) {
+    firebase.database().ref('timers/timer' + count).set({
+        time: e.time
+    });
+    addDiv();
+}
+
+function showShort(id) {
+    var idv = $(id)[0]['id']
+    $("#time_" + idv).toggle();
+    $("#short_" + idv).toggle();
+
+}
+
+function removeDiv(id) {
+    var idv = $(id)[0]['id']
+    firebase.database().ref('timers/' + idv).remove();
+    if (count >= 0) {
+        count = count - 1;
+    }
+
+    firebase.database().ref().update({
+        count: parseInt(count),
+    });
+    $(id).fadeOut(1, 0).fadeTo(500, 0)
+}
+
+function addDiv() {
+    var divRef = firebase.database().ref('timers');
+    divRef.on('value', function(snapshot) {
+        var obj = snapshot.val()
+        var i = 0;
+        $('#wrapper').html('')
+        while (i <= count) {
+            var propertyValues = Object.entries(obj);
+            let ts = propertyValues[i][1]['time']
+                //var timeString = "12:04";
+            var H = +ts.substr(0, 2);
+            var h = (H % 12) || 12;
+            h = (h < 10) ? ("0" + h) : h; // leading 0 at the left for 1 digit hours
+            var ampm = H < 12 ? " AM" : " PM";
+            ts = h + ts.substr(2, 3) + ampm;
+            console.log(ts)
+
+            const x = `
+            <div id=${propertyValues[i][0]}>
+                <div class="btn2 btn__secondary2" onclick=showShort(${propertyValues[i][0]}) id="main_${propertyValues[i][0]}">
+                <div id="time_${propertyValues[i][0]}">
+                ${ts}
+                </div>
+                <div class="icon2" id="short_${propertyValues[i][0]}" onclick=removeDiv(${propertyValues[i][0]})>
+                    <div class="icon__add">
+                        <ion-icon name="trash"></ion-icon>
+                    </div>
+                </div>
+                </div>
+                
+                
+            </div>`
+
+            $('#wrapper').append(x);
+            i++;
+        }
+    });
+}
+    </script>
+</body>
+
+</html>
